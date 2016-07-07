@@ -7,6 +7,7 @@ typedef struct {
 } SerialBuffer;
 
 void initUART(void);
+void UART_baud(int baudrate);
 void putBuf(SerialBuffer *sbuf, char c);
 char getBuf(SerialBuffer *sbuf);
 int rx_count(void);
