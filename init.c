@@ -7,8 +7,9 @@
 // http://eleceng.dit.ie/frank and follow the links
 // Author: Frank Duignan
 
-#include <stdint.h>
 #include "lpc111x.h"
+#include "config.h"
+
 void init(void);
 void clock_init(void);
 int main(void);

@@ -1,4 +1,4 @@
-#define SBUFSIZE 256
+#define SBUFSIZE 768
 typedef struct {
 	volatile unsigned head;
 	volatile unsigned tail;

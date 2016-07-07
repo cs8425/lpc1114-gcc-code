@@ -48,6 +48,8 @@
 #define enable_interrupts() asm(" cpsie i ")
 #define disable_interrupts() asm(" cpsid i ")
 
+#define __enable_irq() asm(" cpsie i ")
+#define __disable_irq() asm(" cpsid i ")
 
 // APB Peripherals
 #define I2C_BASE 		0x40000000
