@@ -1,7 +1,7 @@
 // Serial I/O routines
 #include "serial.h"
 #include "lpc111x.h"
-SerialBuffer TXBuffer,RXBuffer;
+SerialBuffer TXBuffer, RXBuffer;
 void UART_isr(void);
 void initUART()
 {
@@ -38,15 +38,13 @@ void initUART()
 }
 void UART_isr(void)
 {
-	int Source=U0IIR; // have to cache the interrupt id register
+	int Source = U0IIR; // have to cache the interrupt id register
 					  // as the 'if' clause below is reading it
 					  // and hence changing its contents.
-	if (Source & BIT2) // RX Interrupt
-	{
-		putBuf(&RXBuffer,U0RBR);
+	if (Source & BIT2) { // RX Interrupt
+		putBuf(&RXBuffer, U0RBR);
 	}
-	if (Source & BIT1) // TX Interrupt
-	{
+	if (Source & BIT1) { // TX Interrupt
 		if (TXBuffer.count > 0)
 		{			
 			U0THR = getBuf(&TXBuffer);
@@ -55,8 +53,7 @@ void UART_isr(void)
 }
 void putBuf(SerialBuffer *sbuf, char c)
 {
-	if (sbuf->count < SBUFSIZE)
-	{
+	if (sbuf->count < SBUFSIZE) {
 		disable_interrupts();
 		sbuf->count++;
 		sbuf->buffer[sbuf->head] = c;
@@ -67,12 +64,11 @@ void putBuf(SerialBuffer *sbuf, char c)
 char getBuf(SerialBuffer *sbuf)
 {
 	char c=0;
-	if (sbuf->count >0 )
-	{
+	if (sbuf->count >0 ) {
 		disable_interrupts();
 		sbuf->count--;
 		c=sbuf->buffer[sbuf->tail];
-		sbuf->tail=(sbuf->tail+1) % SBUFSIZE;
+		sbuf->tail = (sbuf->tail+1) % SBUFSIZE;
 		enable_interrupts();
 	}
 	return c;
@@ -87,10 +83,9 @@ int tx_count()
 }
 void eputcOld(char c)
 {
-	if (U0LSR & BIT6)
+	if (U0LSR & BIT6) {
 		U0THR = c; // Transmitter idle, so just write out directly
-	else
-	{
+	}else {
 		putBuf(&TXBuffer,c);
 	}
 }
@@ -109,16 +104,14 @@ void printString(char *String)
 {
 	int timeout=0x8000;
 	while( (tx_count()>(SBUFSIZE/2)) && (timeout--));
-	if (!timeout)
-	{
-		U0THR='t';
+	if (!timeout) {
+		U0THR = 't';
 		return;
 	}
-	while(*String)
-	{
+	while(*String) {
 		eputc(*String);
 		String++;
-	}	
+	}
 	return;
 }
 char HexDigit(int Value)
@@ -135,12 +128,11 @@ void printInteger(unsigned int Number)
 	// Output the number over the serial port as
 	// as hexadecimal string.
 	char TxString[9];
-	int Index=8;
-	TxString[Index]=0; // terminate the string
+	int Index = 8;
+	TxString[Index] = 0; // terminate the string
 	Index--;
-	while(Index >=0)
-	{
-		TxString[Index]=HexDigit(Number & 0x0f);
+	while (Index >= 0) {
+		TxString[Index] = HexDigit(Number & 0x0f);
 		Number = Number >> 4;
 		Index--;
 	}
@@ -151,10 +143,10 @@ void printShort(unsigned int Number)
 	// Output the number over the serial port as
 	// as hexadecimal string.
 	char TxString[5];
-	int Index=4;
-	TxString[Index]=0; // terminate the string
+	int Index = 4;
+	TxString[Index] = 0; // terminate the string
 	Index--;
-	while(Index >=0)
+	while(Index >= 0)
 	{
 		TxString[Index]=HexDigit(Number & 0x0f);
 		Number = Number >> 4;
@@ -167,14 +159,15 @@ void printByte(unsigned int Number)
 	// Output the number over the serial port as
 	// as hexadecimal string.
 	char TxString[3];
-	int Index=2;
-	TxString[Index]=0; // terminate the string
+	int Index = 2;
+	TxString[Index] = 0; // terminate the string
 	Index--;
-	while(Index >=0)
+	while(Index >= 0)
 	{
-		TxString[Index]=HexDigit(Number & 0x0f);
+		TxString[Index] = HexDigit(Number & 0x0f);
 		Number = Number >> 4;
 		Index--;
 	}
 	printString(TxString);
 }
+

@@ -7,6 +7,7 @@
 // http://eleceng.dit.ie/frank and follow the links
 // Author: Frank Duignan
 
+#include <stdint.h>
 #include "lpc111x.h"
 void init(void);
 void clock_init(void);
@@ -96,16 +97,16 @@ void init(void)
 	unsigned char *src;
 	unsigned char *dest;
 	unsigned len;
-	src= &INIT_DATA_VALUES;
-	dest= &INIT_DATA_START;
-	len= &INIT_DATA_END-&INIT_DATA_START;
+	src = &INIT_DATA_VALUES;
+	dest = &INIT_DATA_START;
+	len = &INIT_DATA_END - &INIT_DATA_START;
 	while (len--)
 		*dest++ = *src++;
 // zero out the uninitialized global/static variables
 	dest = &BSS_START;
 	len = &BSS_END - &BSS_START;
 	while (len--)
-		*dest++=0;
+		*dest++ = 0;
 	clock_init();
 	main();
 }

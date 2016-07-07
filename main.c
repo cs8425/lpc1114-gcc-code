@@ -18,8 +18,8 @@ void initSysTick(void)
 	// Reload value = 48000-1
 	// enable systick and its interrupts
 	SYST_CSR |=(BIT0+BIT1+BIT2); 
-	SYST_RVR=48000-1; // generate 1 millisecond time base
-	SYST_CVR=5;
+	SYST_RVR = 48000-1; // generate 1 millisecond time base
+	SYST_CVR = 5;
 	enable_interrupts();
 }
 void delay(unsigned amount)

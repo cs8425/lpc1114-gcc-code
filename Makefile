@@ -5,11 +5,6 @@ PROJECT = myapp
 # Define optimisation level here
 OPT = -Os
 
-# define warning options here
-CXX_WARNINGS = -Wall -Wextra
-#C_WARNINGS = -Wall -Wstrict-prototypes -Wextra
-C_WARNINGS = -Wall -Wextra
-
 # C language standard ("c89" / "iso9899:1990", "iso9899:199409",
 # "c99" / "iso9899:1999", "gnu89" - default, "gnu99")
 C_STD = gnu99
@@ -50,9 +45,7 @@ SRC = $(shell find -L $(SRCDIR) -name '*.c')
 OBJS    = $(ASRC:.s=.o) $(SRC:.c=.o)
 
 MCFLAGS =-mcpu=cortex-m0 -mthumb -g 
-#MCFLAGS =-mcpu=cortex-m0 -mthumb 
 
-#ASFLAGS = $(MCFLAGS) -g -gdwarf-2 -Wa,-amhls=$(<:.s=.lst) $(ADEFS)
 ASFLAGS = $(MCFLAGS) -gdwarf-2 -Wa,-amhls=$(<:.s=.lst) $(ADEFS)
 CPFLAGS = $(MCFLAGS) $(OPT) -std=$(C_STD) -gdwarf-2 -fomit-frame-pointer -Wall -Wstrict-prototypes -fverbose-asm -D__USE_CMSIS $(DEFS)
 #CPFLAGS += -Wa,-ahlms=$(<:.c=.lst) 

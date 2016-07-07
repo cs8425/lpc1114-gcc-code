@@ -1,6 +1,5 @@
-#define SBUFSIZE 128
-typedef struct 
-{
+#define SBUFSIZE 256
+typedef struct {
 	volatile unsigned head;
 	volatile unsigned tail;
 	volatile int count;
@@ -18,3 +17,4 @@ void printString(char *s);
 void printInteger(unsigned int Number);
 void printShort(unsigned int Number);
 void printByte(unsigned int Number);
+
