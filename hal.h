@@ -3,6 +3,29 @@
 
 #include "lpc111x.h"
 
+// SI	P1_2
+// CLK	P1_1
+// Ao	P1_0
+
+// SERVO	P0_11	CT32B0_MAT3
+
+// A1	P1_10	CT16B1_MAT1
+// A2	P0_10	CT16B0_MAT2
+// B1	P0_9	CT16B0_MAT1
+// B2	P0_8	CT16B0_MAT0
+
+// SW0	P0_1
+// SW1	P2_8
+
+// DIP0	P0_2
+// DIP1	P2_7
+// DIP2	P2_7
+
+// LED0	P2_4
+// LED1	P2_5
+// LED2	P0_6
+// LED3	P0_7
+
 
 // CLK P1_1
 #define TAOS_CLK_HIGH  GPIO1DATA |= (1<<1)
@@ -12,9 +35,6 @@
 #define TAOS_SI_HIGH   GPIO1DATA |= (1<<2)
 #define TAOS_SI_LOW    GPIO1DATA &= ~(1<<2)
 
-//#define TFC_HBRIDGE_ENABLE          GPIOB_PSOR = (1 << 20)
-//#define TFC_HBRIDGE_DISABLE         GPIOB_PCOR = (1 << 20)
-
 /*
 #define GET_DIP0    (GPIO1DATA & (1<<1))
 #define GET_DIP1    (GPIO1DATA & (1<<19))
@@ -22,37 +42,33 @@
 
 #define GET_SW0    ((GPIO1DATA & (1<<4)) ? 1 : 0)
 #define GET_SW1    ((GPIO1DATA & (1<<5)) ? 1 : 0)
-
-#define SET_LED0_HIGH   GPIOD_PSOR = (1<<1)
-#define SET_LED0_LOW    GPIOD_PCOR = (1<<1)
-#define SET_LED0_T      GPIOD_PTOR = (1<<1)
-
-#define SET_LED1_HIGH   GPIOD_PSOR = (1<<3)
-#define SET_LED1_LOW    GPIOD_PCOR = (1<<3)
-#define SET_LED1_T      GPIOD_PTOR = (1<<3)
-
-#define SET_LED2_HIGH   GPIOD_PSOR = (1<<2)
-#define SET_LED2_LOW    GPIOD_PCOR = (1<<2)
-#define SET_LED2_T      GPIOD_PTOR = (1<<2)
-
-#define SET_LED3_HIGH   GPIOD_PSOR = (1<<0)
-#define SET_LED3_LOW    GPIOD_PCOR = (1<<0)
-#define SET_LED3_T      GPIOD_PTOR = (1<<0)
 */
+#define SET_LED0_HIGH   GPIO2DATA |= (1<<4)
+#define SET_LED0_LOW    GPIO2DATA &= ~(1<<4)
+#define SET_LED0_T      GPIO2DATA ^= (1<<4)
+
+#define SET_LED1_HIGH   GPIO2DATA |= (1<<5)
+#define SET_LED1_LOW    GPIO2DATA &= ~(1<<5)
+#define SET_LED1_T      GPIO2DATA ^= (1<<5)
+
+#define SET_LED2_HIGH   GPIO0DATA |= (1<<6)
+#define SET_LED2_LOW    GPIO0DATA &= ~(1<<6)
+#define SET_LED2_T      GPIO0DATA ^= (1<<6)
+
+#define SET_LED3_HIGH   GPIO0DATA |= (1<<7)
+#define SET_LED3_LOW    GPIO0DATA &= ~(1<<7)
+#define SET_LED3_T      GPIO0DATA ^= (1<<7)
+
 
 // Core clock     48 MHz
 // System clock   48 MHz
-// Bus clock       24 MHz
+// Bus clock       48 MHz
 
 
 // ADC clock = Bus clock
-// FlexTimers = Bus clock
+// Timers = Bus clock
 // PIT = Bus clock
 // GPIO = System clock
-
-// I2C = Bus clock
-// UART0-1 = System clock
-// UART2-5 = Bus clock
 
 // init
 void ADC_init(void){
@@ -84,76 +100,101 @@ uint16_t ADC_read(void){
 // 48MHz
 void PWM_init(void){
 
-	// Turn on CT32B1
-	SYSAHBCLKCTRL |= BIT10;
+// SERVO	P0_11	CT32B0_MAT3
+
+// A1	P1_10	CT16B1_MAT1
+// A2	P0_10	CT16B0_MAT2
+// B1	P0_9	CT16B0_MAT1
+// B2	P0_8	CT16B0_MAT0
+
+	// Turn on CT32B0 CT16B0 CT16B1
+	SYSAHBCLKCTRL |= BIT10 | BIT7 | BIT8;
 
 	// Servo @ 50Hz
-	// GPIO PTC10 (S0)
+// 48Mhz
+// div 24
+// 1s >> 2000000
+// 1ms >> 2000
+// 1.5ms >> 3000
+// 20ms >> 40000
+	TMR32B0TCR = 0x2;  // reset
+	TMR32B0PR = 24 - 1;
+	TMR16B0MR3 = 3000; // 1.5ms
+	TMR16B0MR0 = 40000; // 20ms
+	TMR32B0TCR = 1; // enable = 1, reset = 0
 
-	// GPIO PTC11 (S1)
-
-
-// 60000000
-// div 32
-// 1875 >> 1ms
-// 37500 >> 20ms
-/*	SIM_SCGC3 |= (1 << 25); // Enable FTM3 (Motor)
-	FTM3_SC |= (1 << 3) | (5 << 0); // CLK = System clock / 32
-	FTM3_CNT = 0;
-	FTM3_MOD = 37500; // 10kHz
-
-	FTM3_C6SC |= (2 << 4) | (2 << 2);
-	FTM3_C6V = 2812;
-
-	FTM3_C7SC |= (2 << 4) | (2 << 2);
-	FTM3_C7V = 2812;
-*/
-
-	// Motor PWM (max 11kHz)
-	// GPIO PTC2 (A1)
-
-	// GPIO PTC3 (A2)
-
-	// GPIO PTA1 (B1)
-
-	// GPIO PTA2 (B2)
+	// Servo	P0_11	CT32B0_MAT3
+	IOCON_R_PIO0_11 = 0xC0 | 0x03; // CT32B0_MAT3, no pull
 
 
+	// Motor PWM (@ 10kHz)
+	TMR16B0TCR = 0x2;  // reset
+	TMR16B0PR = 0;
+	TMR16B0MR3 = 4800;
+	TMR16B0MR2 = 4800; // Zero output to begin with
+	TMR16B0MR1 = 4800; // Zero output to begin with
+	TMR16B0MR0 = 4800; // Zero output to begin with
+	TMR16B0MCR = BIT10; // Reset TC on match with MR3
+	TMR16B0TC = 0 ; // Zero the counter to begin with
+	TMR16B0PWMC = BIT2 | BIT1 | BIT0; // Enable PWM on channel 0
+	TMR16B0TCR = 1; // Enable the timer
 
-	// FTM0
-/*	SIM_SCGC6 |= (1 << 24); // Enable FTM0 (servo)
-	FTM0_SC |= (1 << 3) | (0 << 0); // CLK = System clock / 32
-	FTM0_CNT = 0;
-	FTM0_MOD = 6000;
-*/
-	// A1
+	TMR16B1TCR = 0x2;  // reset
+	TMR16B1PR = 0;
+	TMR16B1MR3 = 4800;
+	TMR16B1MR1 = 4800; // Zero output to begin with
+	TMR16B1MCR = BIT10; // Reset TC on match with MR3
+	TMR16B1TC = 0 ; // Zero the counter to begin with
+	TMR16B1PWMC = BIT1; // Enable PWM on channel 0
+	TMR16B1TCR = 1; // Enable the timer
 
-	// A2
-
-	// B1
-
-	// B2
-
-
-}
-
-// center 2812
-// min 1875
-// max 3750
-void TFC_SetServo(uint16_t S0 , uint16_t S1){
-
+	// A1	P1_10	CT16B1_MAT1
+	IOCON_PIO1_10 = 0xC0 | 0x2; // CT16B1_MAT1, no pull
+	// A2	P0_10	CT16B0_MAT2
+	IOCON_SWCLK_PIO0_10  = 0xC0 | 0x03; // CT16B0_MAT2, no pull
+	// B1	P0_9	CT16B0_MAT1
+	IOCON_PIO0_9 = 0xC0 | 0x2; // CT16B0_MAT1, no pull
+	// B2	P0_8	CT16B0_MAT0
+	IOCON_PIO0_8  = 0xC0 | 0x02; // CT16B0_MAT0, no pull
 }
 
 // center 3000
-// min 0
-// max 6000
-void TFC_SetMotorPWM(uint16_t MotorA , uint16_t MotorB){
+// min 2000
+// max 4000
+void TFC_SetServo(uint16_t S0){
+	TMR16B0MR3 = S0;
+}
 
+// center 0
+// min -4800
+// max 4800
+void TFC_SetMotorPWM(int16_t MotorA , int16_t MotorB){
+	if(MotorA > 0){
+		// A1
+		TMR16B1MR1 = 4800 - MotorA;
+		// A2
+		TMR16B0MR2 = 4800;
+	}else{
+		// A1
+		TMR16B1MR1 = 4800;
+		// A2
+		TMR16B0MR2 = 4800 + MotorA;
+	}
+	if(MotorB > 0){
+		// B1
+		TMR16B0MR1 = 4800 - MotorB;
+		// B2
+		TMR16B0MR0 = 4800;
+	}else{
+		// A1
+		TMR16B0MR1 = 4800;
+		// A2
+		TMR16B0MR0 = 4800 + MotorB;
+	}
 }
 
 void GPIO_init(void){
 	SYSAHBCLKCTRL |= BIT6 + BIT16; 	// Turn on clock for GPIO, IOCON
-
 
 	// GPIO P1_1 (CLK)
 	IOCON_R_PIO1_1 &= ~(BIT4+BIT3+BIT2+BIT1+BIT0);  	// ensure Pin P1_1 behaves as GPIO
@@ -166,26 +207,17 @@ void GPIO_init(void){
 	GPIO1DIR |= BIT2;
 
 
-	// GPIO P (LED_0)
+	// SW0	P0_1
+	// SW1	P2_8
 
-	// GPIO P (LED_1)
+	// DIP0	P0_2
+	// DIP1	P2_7
+	// DIP2	P2_7
 
-	// GPIO P (LED_2)
-
-	// GPIO P (LED_3)
-
-	// GPIO PTB20 (H_EN)
-
-
-	// GPIO PTC1 (DIP0)
-
-	// GPIO PTB19 (DIP1)
-
-	// GPIO PTB18 (DIP2)
-
-	// GPIO PTC4 (SW0)
-
-	// GPIO PTC5 (Sw1)
+	// LED0	P2_4
+	// LED1	P2_5
+	// LED2	P0_6
+	// LED3	P0_7
 
 }
 

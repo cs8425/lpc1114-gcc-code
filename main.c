@@ -94,14 +94,7 @@ int main(void){
 	delay(1000);
 	TimerEv_add(&timerev, DEBUG, 125*1000, 1, 1);
 
-/*	delay(100000);
-	RValue = initAccel();	
-	printInteger(RValue);
-	if (RValue == 0) {
-		printString("Boldly going :)\r\n");
-	} else {
-		printString("Inertia sensors offline :(\r\n");
-	}*/
+
 	while (1) {
 		//printShort(ADC_read());
 		//printString("\r\n");
@@ -126,7 +119,15 @@ int main(void){
 
 //		delay(6000000);
 	}
-/*	while (1) {
+/*	delay(100000);
+	RValue = initAccel();
+	printInteger(RValue);
+	if (RValue == 0) {
+		printString("Boldly going :)\r\n");
+	} else {
+		printString("Inertia sensors offline :(\r\n");
+	}
+	while (1) {
 		Temperature = getTemperature();
 		printShort(Temperature);
 		printString(" ");
@@ -184,7 +185,7 @@ void capture(){
 	TAOS_SI_HIGH;
 	TAOS_CLK_HIGH;
 //	wait_us(1);
-	asm("nop;nop;nop;nop;");
+//	asm("nop;nop;nop;nop;");
 	TAOS_SI_LOW;
 
 	for(i = 0; i < 128; i++){

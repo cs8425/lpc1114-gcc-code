@@ -42,23 +42,6 @@ void TimerEv_tick(TimerEv *tmev);
 inline int TimerEv_available(TimerEv *tmev){
 	return (tmev->count) ? 0 : 1;
 }
-void TimerEv_merge(TimerEv *tmev);
-/*static void TimerEv_merge(TimerEv *tmev) {
-	uint16_t i;
-	uint16_t dec = 0;
-	for(i = 0; i < tmev->count; i++){
-		if(tmev->status_map[i] & isRm){
-			if(i+1 < tmev->count){
-				tmev->status_map[i] = tmev->status_map[i+1];
-				tmev->last[i] = tmev->last[i+1];
-				tmev->slot[i] = tmev->slot[i+1];
-				tmev->period[i] = tmev->period[i+1];
-				tmev->status_map[i+1] |= isRm;
-			}
-			dec++;
-		}
-	}
-	tmev->count -= dec;
-}*/
 
 #endif
+

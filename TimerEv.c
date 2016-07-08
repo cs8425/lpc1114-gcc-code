@@ -6,7 +6,7 @@
 
 void us_ticker_init(void){
 
-	SYSAHBCLKCTRL |= (1<<10); // Clock TIMER_1
+	SYSAHBCLKCTRL |= (1<<10); // Clock CT32B1
 	uint32_t PCLK = 48000000;
 
 	TMR32B1TCR = 0x2;  // reset
@@ -19,6 +19,24 @@ void us_ticker_init(void){
 
 uint32_t us_ticker_read(void) {
 	return TMR32B1TC;
+}
+
+static void TimerEv_merge(TimerEv *tmev) {
+	uint16_t i;
+	uint16_t dec = 0;
+	for(i = 0; i < tmev->count; i++){
+		if(tmev->status_map[i] & isRm){
+			if(i+1 < tmev->count){
+				tmev->status_map[i] = tmev->status_map[i+1];
+				tmev->last[i] = tmev->last[i+1];
+				tmev->slot[i] = tmev->slot[i+1];
+				tmev->period[i] = tmev->period[i+1];
+				tmev->status_map[i+1] |= isRm;
+			}
+			dec++;
+		}
+	}
+	tmev->count -= dec;
 }
 
 void TimerEv_init(TimerEv *tmev, EventDriven *_evlp) {
@@ -113,21 +131,4 @@ void TimerEv_tick(TimerEv *tmev) {
 	if(mg) TimerEv_merge(tmev);
 }
 
-void TimerEv_merge(TimerEv *tmev) {
-	uint16_t i;
-	uint16_t dec = 0;
-	for(i = 0; i < tmev->count; i++){
-		if(tmev->status_map[i] & isRm){
-			if(i+1 < tmev->count){
-				tmev->status_map[i] = tmev->status_map[i+1];
-				tmev->last[i] = tmev->last[i+1];
-				tmev->slot[i] = tmev->slot[i+1];
-				tmev->period[i] = tmev->period[i+1];
-				tmev->status_map[i+1] |= isRm;
-			}
-			dec++;
-		}
-	}
-	tmev->count -= dec;
-}
 

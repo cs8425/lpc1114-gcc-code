@@ -1,5 +1,26 @@
 #include "EventDriven.h"
 
+static inline void _EventDriven_getbit(EventDriven *_ev, unsigned char c) {
+	unsigned char i = 0;
+
+	while(c >= 8) {
+		i++;
+		c -= 8;
+	}
+	_ev->index = i;
+	_ev->offset = c;
+}
+
+static inline void _EventDriven_set_map(EventDriven *_ev, unsigned char c) {
+	_EventDriven_getbit(_ev, c);
+	_ev->union_map[_ev->index] |= (1 << _ev->offset);
+}
+
+static inline void _EventDriven_clear_map(EventDriven *_ev, unsigned char c) {
+	_EventDriven_getbit(_ev, c);
+	_ev->union_map[_ev->index] &= ~(1 << _ev->offset);
+}
+
 void EventDriven_init(EventDriven *_ev){
 	unsigned char i;
 	_ev->head = 0;
@@ -87,7 +108,6 @@ static inline void _EventDriven_getbit(EventDriven *_ev, unsigned char c) {
 	_ev->index = i;
 	_ev->offset = c;
 }
-
 static inline void _EventDriven_set_map(EventDriven *_ev, unsigned char c) {
 	_EventDriven_getbit(_ev, c);
 	_ev->union_map[_ev->index] |= (1 << _ev->offset);
