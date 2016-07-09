@@ -62,13 +62,6 @@
 
 // Core clock     48 MHz
 // System clock   48 MHz
-// Bus clock       48 MHz
-
-
-// ADC clock = Bus clock
-// Timers = Bus clock
-// PIT = Bus clock
-// GPIO = System clock
 
 // init
 void ADC_init(void){
@@ -108,7 +101,7 @@ void PWM_init(void){
 // B2	P0_8	CT16B0_MAT0
 
 	// Turn on CT32B0 CT16B0 CT16B1
-	SYSAHBCLKCTRL |= BIT10 | BIT7 | BIT8;
+	SYSAHBCLKCTRL |= BIT9 | BIT7 | BIT8;
 
 	// Servo @ 50Hz
 // 48Mhz
@@ -119,77 +112,95 @@ void PWM_init(void){
 // 20ms >> 40000
 	TMR32B0TCR = 0x2;  // reset
 	TMR32B0PR = 24 - 1;
-	TMR16B0MR3 = 3000; // 1.5ms
-	TMR16B0MR0 = 40000; // 20ms
-	TMR32B0TCR = 1; // enable = 1, reset = 0
+	TMR32B0MR3 = 40000 - 3000; // 1.5ms
+	TMR32B0MR0 = 40000; // 20ms
+	TMR32B0MCR = BIT1; // Reset TC on match with MR0
+	TMR32B0TC = 0;
+	TMR32B0PWMC = BIT3; // Enable PWM on channel 3
+	TMR32B0TCR = 0x1; // enable = 1, reset = 0
+
+// MAX = 2ms >> 24000 * 2
+// MIN = 1ms >> 24000 * 1
+//	LPC_TMR32B0->PR = 15;          // div 16
+//	LPC_TMR32B0->MR2 = 60000;          // MR2 = Period
+//	LPC_TMR32B0->MR3 = 60000 - 4500;            // MR3 = 1.5ms
 
 	// Servo	P0_11	CT32B0_MAT3
-	IOCON_R_PIO0_11 = 0xC0 | 0x03; // CT32B0_MAT3, no pull
+	IOCON_R_PIO0_11 = 0xC0 | 0x03; //0x03; // CT32B0_MAT3, no pull
 
 
 	// Motor PWM (@ 10kHz)
 	TMR16B0TCR = 0x2;  // reset
 	TMR16B0PR = 0;
 	TMR16B0MR3 = 4800;
-	TMR16B0MR2 = 4800; // Zero output to begin with
-	TMR16B0MR1 = 4800; // Zero output to begin with
-	TMR16B0MR0 = 4800; // Zero output to begin with
+	TMR16B0MR2 = 4801; // Zero output to begin with
+	TMR16B0MR1 = 4801; // Zero output to begin with
+	TMR16B0MR0 = 4801; // Zero output to begin with
 	TMR16B0MCR = BIT10; // Reset TC on match with MR3
 	TMR16B0TC = 0 ; // Zero the counter to begin with
-	TMR16B0PWMC = BIT2 | BIT1 | BIT0; // Enable PWM on channel 0
+	TMR16B0PWMC = BIT2 | BIT1 | BIT0; // Enable PWM on channel 0, 1, 2
 	TMR16B0TCR = 1; // Enable the timer
 
 	TMR16B1TCR = 0x2;  // reset
 	TMR16B1PR = 0;
 	TMR16B1MR3 = 4800;
-	TMR16B1MR1 = 4800; // Zero output to begin with
+	TMR16B1MR1 = 4801; // Zero output to begin with
 	TMR16B1MCR = BIT10; // Reset TC on match with MR3
 	TMR16B1TC = 0 ; // Zero the counter to begin with
-	TMR16B1PWMC = BIT1; // Enable PWM on channel 0
+	TMR16B1PWMC = BIT1; // Enable PWM on channel 1
 	TMR16B1TCR = 1; // Enable the timer
 
 	// A1	P1_10	CT16B1_MAT1
 	IOCON_PIO1_10 = 0xC0 | 0x2; // CT16B1_MAT1, no pull
+//	GPIO1DATA &= ~(BIT10);
+
 	// A2	P0_10	CT16B0_MAT2
 	IOCON_SWCLK_PIO0_10  = 0xC0 | 0x03; // CT16B0_MAT2, no pull
 	// B1	P0_9	CT16B0_MAT1
 	IOCON_PIO0_9 = 0xC0 | 0x2; // CT16B0_MAT1, no pull
 	// B2	P0_8	CT16B0_MAT0
 	IOCON_PIO0_8  = 0xC0 | 0x02; // CT16B0_MAT0, no pull
+//	GPIO0DATA &= ~(BIT10 | BIT9 | BIT8);
 }
 
 // center 3000
 // min 2000
 // max 4000
 void TFC_SetServo(uint16_t S0){
-	TMR16B0MR3 = S0;
+	TMR32B0MR3 = 40000 - S0;
 }
 
 // center 0
 // min -4800
 // max 4800
 void TFC_SetMotorPWM(int16_t MotorA , int16_t MotorB){
-	if(MotorA > 0){
-		// A1
-		TMR16B1MR1 = 4800 - MotorA;
-		// A2
-		TMR16B0MR2 = 4800;
+	if(MotorA == 0){
+			TMR16B1MR1 = 4801;
+			TMR16B0MR2 = 4801;
 	}else{
-		// A1
-		TMR16B1MR1 = 4800;
-		// A2
-		TMR16B0MR2 = 4800 + MotorA;
+		if(MotorA > 0){
+			// A1
+			TMR16B1MR1 = 4800 - MotorA;
+			// A2
+			TMR16B0MR2 = 4801;
+		}else{
+			TMR16B1MR1 = 4801;
+			TMR16B0MR2 = 4800 + MotorA;
+		}
 	}
-	if(MotorB > 0){
-		// B1
-		TMR16B0MR1 = 4800 - MotorB;
-		// B2
-		TMR16B0MR0 = 4800;
+	if(MotorB == 0){
+			TMR16B0MR1 = 4801;
+			TMR16B0MR0 = 4801;
 	}else{
-		// A1
-		TMR16B0MR1 = 4800;
-		// A2
-		TMR16B0MR0 = 4800 + MotorB;
+		if(MotorB > 0){
+			// B1
+			TMR16B0MR1 = 4800 - MotorB;
+			// B2
+			TMR16B0MR0 = 4801;
+		}else{
+			TMR16B0MR1 = 4801;
+			TMR16B0MR0 = 4800 + MotorB;
+		}
 	}
 }
 

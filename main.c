@@ -10,18 +10,16 @@
 #include "EventDriven.h"
 #include "TimerEv.h"
 
+#include "filter.h"
+
 uint8_t get_dip(void);
 void set_led(uint8_t i);
 
 void capture(void);
 void dump(void);
+void dump2(void);
+void dump_edge(char h, edge *_E);
 
-#define CAM0 px0
-
-#define CAM_value_MAX 65535
-#define CAM_value_MIN 0
-
-uint16_t px0[128];
 
 void SysTick(void)
 {
@@ -48,13 +46,7 @@ void delay(uint32_t amount)
 {
 	while (amount--) asm("nop");
 }
-void ConfigPins(void)
-{
-	SYSAHBCLKCTRL |= BIT6 + BIT16; 	// Turn on clock for GPIO, ADC, IOCON 
-	IOCON_PIO0_2 &= ~(BIT1+BIT0);  	// ensure Pin 25 behaves as GPIO
-	GPIO0DIR |= BIT2;       		// Make Pin 25 an output	
-	GPIO0DATA = 0;          		// 0 output initially
-}
+
 int ReadADC(void)
 {
 	// Start a conversion
@@ -94,6 +86,8 @@ int main(void){
 	delay(1000);
 	TimerEv_add(&timerev, DEBUG, 125*1000, 1, 1);
 
+	edge_init(&edgeL2H);
+	edge_init(&edgeH2L);
 
 	while (1) {
 		//printShort(ADC_read());
@@ -101,16 +95,27 @@ int main(void){
 		TimerEv_tick(&timerev); // 週期性的事件推送
 		switch(EventDriven_get(&eventloop)){ // 事件處理
 			case CAM:
+				SET_LED1_HIGH;
 				capture();
-				
+				filt();
+				MA();
+				scale();
+				cut();
+				SET_LED1_LOW;
+
+				SET_LED2_HIGH;
+				//M_FB = get_dip() * 375;
+				//toCtrl();
+				SET_LED2_LOW;
 			break;
 
 			case DEBUG:
-				dump();
+				dump2();
 			break;
 
 			case LED:
-				GPIO0DATA ^= BIT2;
+				SET_LED0_T;
+				dump_edge('L', &edgeL2H);
 			break;
 
 		}
@@ -200,7 +205,7 @@ void capture(){
 	__enable_irq();
 }
 
-inline void _p(const int data){
+inline void _p(const int16_t data){
 	eputc( ((data >> 12) & 0xF) + '0');
 	eputc( ((data >> 8) & 0xF) + '0');
 	eputc( ((data >> 4) & 0xF) + '0');
@@ -212,9 +217,38 @@ void dump(void){
 	eputc('!');
 	eputc('c');
 	for(i = 0; i < 128; i ++){
-//		_p(MA_out[i]);
+//		_p(filt_out[i]);
 		_p(CAM0[i]);
 	}
 	eputc('\n');
 }
+void dump2(void){
+	unsigned char i;
+
+	eputc('!');
+	eputc('d');
+	for(i = 0; i < 106; i ++){
+		_p(bin_out[i]);
+//		_p(MA_out[i]);
+//		_p(MA_out_ABS[i]);
+//		_p(filt_out[i]);
+	}
+	eputc('\n');
+}
+void dump_edge(char h, edge *_E){
+	uint8_t i;
+	uint8_t count = edge_get_count(_E);
+	int16_t tmp;
+
+	eputc('!');
+	eputc(h);
+	for(i = 0; i < count; i ++){
+//		tmp = _E.get_R2L(i);
+		tmp = edge_get_L2R(_E, i);
+		eputc( ((tmp >> 4) & 0xF) + '0');
+		eputc( (tmp & 0xF) + '0');
+	}
+	eputc('\n');
+}
+
 
