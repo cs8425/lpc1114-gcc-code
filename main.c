@@ -47,19 +47,6 @@ void delay(uint32_t amount)
 	while (amount--) asm("nop");
 }
 
-int ReadADC(void)
-{
-	// Start a conversion
-	AD0CR |= BIT1 + BIT24;
-	// Wait for conversion to complete
-	while((AD0GDR&BIT31)==0);
-	// return the result
-	return ((AD0GDR>>6)&0x3ff);
-}
-int RValue;
-int Temperature;
-motion m;
-
 #define CAM          1
 #define LED          2
 #define DEBUG        3
@@ -74,7 +61,7 @@ int main(void){
 	GPIO_init();
 	PWM_init();
 
-	initSysTick();
+	//initSysTick();
 
 	us_ticker_init();
 
@@ -90,8 +77,6 @@ int main(void){
 	edge_init(&edgeH2L);
 
 	while (1) {
-		//printShort(ADC_read());
-		//printString("\r\n");
 		TimerEv_tick(&timerev); // 週期性的事件推送
 		switch(EventDriven_get(&eventloop)){ // 事件處理
 			case CAM:
@@ -116,6 +101,12 @@ int main(void){
 			case LED:
 				SET_LED0_T;
 				dump_edge('L', &edgeL2H);
+				printShort(get_dip());
+				eputc(',');
+				eputc('0' + GET_SW0);
+				eputc(',');
+				eputc('0' + GET_SW1);
+				printString("\n");
 			break;
 
 		}
@@ -125,6 +116,9 @@ int main(void){
 //		delay(6000000);
 	}
 /*	delay(100000);
+	int RValue;
+	int Temperature;
+	motion m;
 	RValue = initAccel();
 	printInteger(RValue);
 	if (RValue == 0) {
@@ -144,13 +138,13 @@ int main(void){
 		printShort(m.z_a);
 		printString(" ");
 		printString("\r\n");
-		GPIO0DATA ^= BIT2;
 		delay(6000000);
 	}*/
 
 	return 0;
 }
-/*uint8_t get_dip(){
+
+uint8_t get_dip(){
     int n = (GET_DIP2) ? 1 : 0;
     n <<= 1;
     n |= (GET_DIP1) ? 1 : 0;
@@ -158,7 +152,6 @@ int main(void){
     n |= (GET_DIP0) ? 1 : 0;
     return n;
 }
-
 void set_led(uint8_t i){
     if(i & 0x01){
         SET_LED0_HIGH;
@@ -181,7 +174,7 @@ void set_led(uint8_t i){
         SET_LED3_LOW;
     }
 }
-*/
+
 void capture(){
 	uint8_t i;
 

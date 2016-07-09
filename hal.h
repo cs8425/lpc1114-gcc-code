@@ -15,11 +15,11 @@
 // B2	P0_8	CT16B0_MAT0
 
 // SW0	P0_1
-// SW1	P2_8
+// SW1	P0_3
 
 // DIP0	P0_2
 // DIP1	P2_7
-// DIP2	P2_7
+// DIP2	P2_8
 
 // LED0	P2_4
 // LED1	P2_5
@@ -35,14 +35,14 @@
 #define TAOS_SI_HIGH   GPIO1DATA |= (1<<2)
 #define TAOS_SI_LOW    GPIO1DATA &= ~(1<<2)
 
-/*
-#define GET_DIP0    (GPIO1DATA & (1<<1))
-#define GET_DIP1    (GPIO1DATA & (1<<19))
-#define GET_DIP2    (GPIO1DATA & (1<<18))
 
-#define GET_SW0    ((GPIO1DATA & (1<<4)) ? 1 : 0)
-#define GET_SW1    ((GPIO1DATA & (1<<5)) ? 1 : 0)
-*/
+#define GET_DIP0    (GPIO0DATA & (1<<2))
+#define GET_DIP1    (GPIO2DATA & (1<<7))
+#define GET_DIP2    (GPIO2DATA & (1<<8))
+
+#define GET_SW0    ((GPIO0DATA & (1<<1)) ? 1 : 0)
+#define GET_SW1    ((GPIO0DATA & (1<<3)) ? 1 : 0)
+
 #define SET_LED0_HIGH   GPIO2DATA |= (1<<4)
 #define SET_LED0_LOW    GPIO2DATA &= ~(1<<4)
 #define SET_LED0_T      GPIO2DATA ^= (1<<4)
@@ -219,16 +219,31 @@ void GPIO_init(void){
 
 
 	// SW0	P0_1
-	// SW1	P2_8
+	// SW1	P0_3
+	IOCON_PIO0_1 = 0xC0 | (0x02 << 3) | (0x00); // pull up
+	IOCON_PIO0_3 = 0xC0 | (0x02 << 3) | (0x00); // pull up
+	GPIO0DIR &= ~(BIT3 | BIT1);
+
 
 	// DIP0	P0_2
 	// DIP1	P2_7
-	// DIP2	P2_7
+	// DIP2	P2_8
+	IOCON_PIO0_2 = 0xC0 | (0x01 << 3) | (0x00); // pull down
+	IOCON_PIO2_7 = 0xC0 | (0x01 << 3) | (0x00); // pull down
+	IOCON_PIO2_8 = 0xC0 | (0x01 << 3) | (0x00); // pull down
+	GPIO0DIR &= ~(BIT3);
+	GPIO2DIR &= ~(BIT8 | BIT7);
 
 	// LED0	P2_4
 	// LED1	P2_5
 	// LED2	P0_6
 	// LED3	P0_7
+	IOCON_PIO2_4 = 0xC0 | (0x00 << 3) | (0x00);
+	IOCON_PIO2_5 = 0xC0 | (0x00 << 3) | (0x00);
+	IOCON_PIO0_6 = 0xC0 | (0x00 << 3) | (0x00);
+	IOCON_PIO0_7 = 0xC0 | (0x00 << 3) | (0x00);
+	GPIO2DIR |= BIT5 | BIT4;
+	GPIO0DIR |= BIT7 | BIT6;
 
 }
 
