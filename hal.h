@@ -245,6 +245,9 @@ void GPIO_init(void){
 	GPIO2DIR |= BIT5 | BIT4;
 	GPIO0DIR |= BIT7 | BIT6;
 
+	GPIO2DATA &= ~(BIT5 | BIT4);
+	GPIO0DATA &= ~(BIT7 | BIT6);
+
 }
 
 #endif

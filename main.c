@@ -11,6 +11,7 @@
 #include "TimerEv.h"
 
 #include "filter.h"
+#include "ctrl.h"
 
 uint8_t get_dip(void);
 void set_led(uint8_t i);
@@ -89,8 +90,8 @@ int main(void){
 				SET_LED1_LOW;
 
 				SET_LED2_HIGH;
-				//M_FB = get_dip() * 375;
-				//toCtrl();
+				M_FB = get_dip() * 400;
+				toCtrl();
 				SET_LED2_LOW;
 			break;
 
@@ -106,7 +107,11 @@ int main(void){
 				eputc('0' + GET_SW0);
 				eputc(',');
 				eputc('0' + GET_SW1);
+				eputc(',');
+				printShort(debug_int3);
 				printString("\n");
+
+				//pc.printf("%d,%d:%f:%d[%d,%d]\n", debug_int, debug_int2, debug_f, get_dip(), GET_SW0, GET_SW1);
 			break;
 
 		}
