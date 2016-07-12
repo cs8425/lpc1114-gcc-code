@@ -13,7 +13,7 @@
 
 
 // 前輪轉向的PID參數
-PIDf32_new(servo, 10.0, 0.0, 4.5);
+PIDf32_new(servo, 8.0, 0.0, 8.5);
 //PIDf32_new(servo, 8.0, 0.0, 4.5);
 
 // 後輪差速的PID
@@ -136,16 +136,16 @@ void toCtrl(void) {
 //	degOfFire(&Af, (diff * 15), (ddiff / 8));
 //	out = deFuzzication(&Af) / 32;
 
-	out = 3000 - out;
+	out = 3000 - out + 110;
 	if(out > 3700) out = 3700;
 	if(out < 2300) out = 2300;
-	M_SV = out - 110;
+	M_SV = out;
 
 
 	// 計算後輪差速的控制量
 //	dfout = PIDf32_PDctrlDF(&differential, diff);
-	degOfFire(&Af, (diff * 1), (ddiff / 8));
-	dfout = deFuzzication(&Af) / 6;
+	degOfFire(&Af, (diff * 1), (ddiff *2));
+	dfout = deFuzzication(&Af) / 5.5;//if out small then 
 	// dfout = differential.ctrl2(L, R, pL.D, pR.D);
 //	dfout = - dfout;
 
