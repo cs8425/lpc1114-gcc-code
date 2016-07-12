@@ -22,7 +22,7 @@
 #define MAXINMBNUM 0x07 
 #define MAXRULE  0x31
 
-#define MAXVALUE  65536
+#define MAXVALUE     65535
 
 #define min(a, b) (((b) > (a)) ? (a) : (b))
 
@@ -68,6 +68,7 @@ int8_t setTrimf(FuzzyInput* fi, uint8_t mfID, Finput_t left, Finput_t middleLeft
 
 		tmp = (middleRight - right);
 		fi->_inMf[mfID].slopeR = (tmp == 0) ? 0 : MAXVALUE / tmp;
+
 		state = 0;
 	} else {
 		state = -1;
@@ -84,7 +85,7 @@ int8_t setRule(FuzzyRule* fr, uint8_t rule1, uint8_t rule2, Frule_t output) {
 	int8_t state = 0;
 
 	if(rule1<MAXINMBNUM && rule2<MAXINMBNUM) {
-	fr->_ruleTable[rule1][rule2] = output;
+		fr->_ruleTable[rule1][rule2] = output;
 		state = 0;
 	} else {
 		state = -1;
@@ -108,9 +109,9 @@ typedef struct {
 	uint8_t _in1ActNum;
 	uint8_t _in2Active[MAXINMBNUM];
 	uint8_t _in2ActNum;
-	uint8_t _fuzzifiType;
-	uint8_t _andType;
-	uint8_t _impType;
+//	uint8_t _fuzzifiType;
+//	uint8_t _andType;
+//	uint8_t _impType;
 	Ftype_t _inMaxR[2];
 	Ftype_t _inMaxL[2];
 
@@ -202,13 +203,13 @@ int8_t degOfFire(Fuzzy *fy, Finput_t sysin1, Finput_t sysin2) {
 		} else if( sysin1 < fy->_input1->_inMf[index].middleL ) {
 			d1 = sysin1 - fy->_input1->_inMf[index].left;
 //			v1 = d1 / fy->_input1->_inMf[index].slopeL;
-			v1 = fy->_input1->_inMf[index].slopeL / d1;
+			v1 = (d1 == 0) ? 0 : fy->_input1->_inMf[index].slopeL * d1;
 		} else if( sysin1 <= fy->_input1->_inMf[index].middleR ) {
 			v1 = 1;
 		} else if( sysin1 < fy->_input1->_inMf[index].right ) {
 			d1 = sysin1 - fy->_input1->_inMf[index].right;
 //			v1 = d1 / fy->_input1->_inMf[index].slopeR;
-			v1 = fy->_input1->_inMf[index].slopeR / d1;
+			v1 = (d1 == 0) ? 0 : fy->_input1->_inMf[index].slopeR * d1;
 		} else {
 			v1 = 0;
 		}
@@ -219,13 +220,13 @@ int8_t degOfFire(Fuzzy *fy, Finput_t sysin1, Finput_t sysin2) {
 		} else if( sysin2 < fy->_input2->_inMf[index].middleL ) {
 			d1 = sysin2 - fy->_input2->_inMf[index].left;
 //			v2 = d1 / fy->_input2->_inMf[index].slopeL;
-			v2 = fy->_input2->_inMf[index].slopeL / d1;
+			v2 = (d1 == 0) ? 0 : fy->_input2->_inMf[index].slopeL / d1;
 		} else if( sysin2 <= fy->_input2->_inMf[index].middleR ) {
 			v2 = 1;
 		} else if( sysin2 < fy->_input2->_inMf[index].right ) {
 			d1 = sysin2 - fy->_input2->_inMf[index].right;
 //			v2 = d1 / fy->_input2->_inMf[index].slopeR;
-			v2 = fy->_input2->_inMf[index].slopeR / d1;
+			v2 = (d1 == 0) ? 0 : fy->_input2->_inMf[index].slopeR / d1;
 		} else {
 			v2 = 0;
 		}
@@ -296,7 +297,7 @@ Foutput_t deFuzzication(Fuzzy *fy) {
 
 					valueo = getRule(fy->_rule1,ri1,ri2);
 
-					a1 = (double)valuei * (double)valueo;
+					a1 = valuei * valueo;
 /*
 					switch(fy->_impType) {
 						case 0:
@@ -315,7 +316,8 @@ Foutput_t deFuzzication(Fuzzy *fy) {
 //					printf("%d %d %d %d %d %d\n",ri1,ri2,valuei,valueo,num,den);
 				}
 			}
-			result = num / den;
+			result = (den == 0) ? 0 : (num / den);
+//			result = num / den;
 /*
 			break;
 		default:
