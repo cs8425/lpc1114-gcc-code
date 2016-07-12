@@ -28,7 +28,7 @@ uint8_t show_mode = 0;
 uint8_t force_stop = 0;
 
 float debug_f = 0.0;
-int16_t debug_int = 0;
+int16_t debug_int1 = 0;
 int16_t debug_int2 = 0;
 int16_t debug_int3 = 0;
 
@@ -121,7 +121,7 @@ void toCtrl(void) {
 
 
 
-	debug_int = L;
+	debug_int1 = L;
 	debug_int2 = R;
 
 	debug_int3 = diff;

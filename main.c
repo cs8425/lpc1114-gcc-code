@@ -62,8 +62,6 @@ int main(void){
 	GPIO_init();
 	PWM_init();
 
-	//initSysTick();
-
 	us_ticker_init();
 
 	EventDriven_init(&eventloop);
@@ -92,13 +90,13 @@ int main(void){
 				cut();
 				SET_LED2_LOW;
 
-				M_FB = get_dip() * 400;
+				M_FB = get_dip() * 600;
 				toCtrl();
 
 			break;
 
 			case DEBUG:
-				dump2();
+				//dump2();
 			break;
 
 			case LED:
@@ -110,6 +108,10 @@ int main(void){
 				eputc(',');
 				eputc('0' + GET_SW1);
 				eputc(',');
+				printShort(debug_int1);
+				eputc(',');
+				printShort(debug_int2);
+				eputc(',');
 				printShort(debug_int3);
 				printString("\n");
 
@@ -118,9 +120,6 @@ int main(void){
 
 		}
 
-
-
-//		delay(6000000);
 	}
 /*	delay(100000);
 	int RValue;
