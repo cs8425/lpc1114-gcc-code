@@ -112,7 +112,7 @@ int main(void){
 
 			case LED:
 				SET_LED0_T;
-				dump_edge('L', &edgeL2H);
+				//dump_edge('L', &edgeL2H);
 				printShort(get_dip());
 				eputc(',');
 				eputc('0' + GET_SW0);

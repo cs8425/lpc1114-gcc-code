@@ -132,11 +132,9 @@ void toCtrl(void) {
 
 	// 計算前輪轉向的控制量
 	// debug_f = servo.ctrl2(L, R, pL.D, pR.D);
-//	out = PIDf32_PDctrl(&servo, diff);
-	degOfFire(&Af, (diff * 15), (ddiff / 8));
-	out = deFuzzication(&Af) / 32;
-
-	debug_int3 = out;
+	out = PIDf32_PDctrl(&servo, diff);
+//	degOfFire(&Af, (diff * 15), (ddiff / 8));
+//	out = deFuzzication(&Af) / 32;
 
 	out = 3000 - out;
 	if(out > 3700) out = 3700;
@@ -145,13 +143,17 @@ void toCtrl(void) {
 
 
 	// 計算後輪差速的控制量
-	dfout = PIDf32_PDctrlDF(&differential, diff);
+//	dfout = PIDf32_PDctrlDF(&differential, diff);
+	degOfFire(&Af, (diff * 1), (ddiff / 8));
+	dfout = deFuzzication(&Af) / 6;
 	// dfout = differential.ctrl2(L, R, pL.D, pR.D);
 //	dfout = - dfout;
 
 	if(dfout > 4800) dfout = 4800;
 	if(dfout < -4800) dfout = -4800;
 	M_DF = -dfout;
+
+	debug_int3 = -dfout;
 
 	toPWM(M_FB, M_DF, M_SV);
 }

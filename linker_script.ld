@@ -3,7 +3,7 @@
 MEMORY
 {
     flash : org = 0x00000000, len = 32k
-    ram : org = 0x10000000, len = 8k
+    ram : org = 0x10000000, len = 4k
 }
   
 SECTIONS

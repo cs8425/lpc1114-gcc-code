@@ -2,7 +2,8 @@
 #include <stdint.h>
 #include "serial.h"
 #include "lpc111x.h"
-SerialBuffer TXBuffer, RXBuffer;
+SerialBuffer_TX TXBuffer;
+SerialBuffer_RX RXBuffer;
 void UART_isr(void);
 void initUART()
 {
@@ -125,33 +126,71 @@ void UART_isr(void)
 					  // as the 'if' clause below is reading it
 					  // and hence changing its contents.
 	if (Source & BIT2) { // RX Interrupt
-		putBuf(&RXBuffer, U0RBR);
+		putBuf_RX(&RXBuffer, U0RBR);
 	}
 	if (Source & BIT1) { // TX Interrupt
 		if (TXBuffer.count > 0)
 		{			
-			U0THR = getBuf(&TXBuffer);
+			U0THR = getBuf_TX(&TXBuffer);
 		}		
 	}
 }
-void putBuf(SerialBuffer *sbuf, char c)
+void putBuf_RX(SerialBuffer_RX *sbuf, char c)
 {
-	if (sbuf->count < SBUFSIZE) {
+	if (sbuf->count < RX_SBUFSIZE) {
 		disable_interrupts();
 		sbuf->count++;
-		sbuf->buffer[sbuf->head] = c;
-		sbuf->head=(sbuf->head+1) % SBUFSIZE;
+//		sbuf->buffer[sbuf->head] = c;
+//		sbuf->head = (sbuf->head+1) % SBUFSIZE;
+		sbuf->buffer[sbuf->head++] = c;
+		if(sbuf->head >= RX_SBUFSIZE){
+			sbuf->head = 0;
+		}
 		enable_interrupts();
 	}
 }
-char getBuf(SerialBuffer *sbuf)
+void putBuf_TX(SerialBuffer_TX *sbuf, char c)
 {
-	char c=0;
-	if (sbuf->count >0 ) {
+	if (sbuf->count < TX_SBUFSIZE) {
+		disable_interrupts();
+		sbuf->count++;
+//		sbuf->buffer[sbuf->head] = c;
+//		sbuf->head = (sbuf->head+1) % SBUFSIZE;
+		sbuf->buffer[sbuf->head++] = c;
+		if(sbuf->head >= TX_SBUFSIZE){
+			sbuf->head = 0;
+		}
+		enable_interrupts();
+	}
+}
+char getBuf_RX(SerialBuffer_RX *sbuf)
+{
+	char c = 0;
+	if (sbuf->count > 0) {
 		disable_interrupts();
 		sbuf->count--;
-		c=sbuf->buffer[sbuf->tail];
-		sbuf->tail = (sbuf->tail+1) % SBUFSIZE;
+//		c = sbuf->buffer[sbuf->tail];
+//		sbuf->tail = (sbuf->tail+1) % SBUFSIZE;
+		c = sbuf->buffer[sbuf->tail++];
+		if(sbuf->tail >= RX_SBUFSIZE){
+			sbuf->tail = 0;
+		}
+		enable_interrupts();
+	}
+	return c;
+}
+char getBuf_TX(SerialBuffer_TX *sbuf)
+{
+	char c = 0;
+	if (sbuf->count > 0) {
+		disable_interrupts();
+		sbuf->count--;
+//		c = sbuf->buffer[sbuf->tail];
+//		sbuf->tail = (sbuf->tail+1) % SBUFSIZE;
+		c = sbuf->buffer[sbuf->tail++];
+		if(sbuf->tail >= TX_SBUFSIZE){
+			sbuf->tail = 0;
+		}
 		enable_interrupts();
 	}
 	return c;
@@ -164,29 +203,21 @@ int tx_count()
 {
 	return TXBuffer.count;
 }
-void eputcOld(char c)
-{
-	if (U0LSR & BIT6) {
-		U0THR = c; // Transmitter idle, so just write out directly
-	}else {
-		putBuf(&TXBuffer,c);
-	}
-}
 void eputc(char c)
 {
-	putBuf(&TXBuffer,c);	
+	putBuf_TX(&TXBuffer,c);	
 	if (U0LSR & BIT6) // If Transmitter idle, kickstart first write
-		U0THR = getBuf(&TXBuffer); 		
+		U0THR = getBuf_TX(&TXBuffer); 		
 }
 
 char egetc()
 {
-	return getBuf(&RXBuffer);
+	return getBuf_RX(&RXBuffer);
 }
 void printString(char *String)
 {
-	int timeout=0x8000;
-	while( (tx_count()>(SBUFSIZE/2)) && (timeout--));
+	int timeout = 0x8000;
+	while( (tx_count()>(TX_SBUFSIZE/2)) && (timeout--));
 	if (!timeout) {
 		U0THR = 't';
 		return;
