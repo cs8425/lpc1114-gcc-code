@@ -3,7 +3,7 @@
 PROJECT = myapp
 
 # Define optimisation level here
-OPT = -Os
+OPT = -O3
 
 # C language standard ("c89" / "iso9899:1990", "iso9899:199409",
 # "c99" / "iso9899:1999", "gnu89" - default, "gnu99")

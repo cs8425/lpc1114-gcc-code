@@ -138,49 +138,44 @@ void scale(void){
 void cut(void){
 	uint8_t i;
 	int8_t status;
-
-	//MA_out_ABS[0] = status = (MA_out_ABS[0] > threshold) ? 1 : 0;
+	int8_t tmp;
 
 	if(MA_out_ABS[0] > threshold){
-		//MA_out_ABS[0] = 1;
 		if(MA_out[0] > 0){
-			status = bin_out[0] = 1;
-			Debug_out[0] = 1;
+			status = 1;
 		}else{
-			status = bin_out[0] = -1;
-			Debug_out[0] = -1;
+			status = -1;
 		}
 	}else{
 		//MA_out_ABS[0] = 0;
-		status = bin_out[0] = 0;
-		Debug_out[0] = 0;
+		status = 0;
 	}
+	bin_out[0] = status;
+//	Debug_out[0] = status;
 
 	for(i=1;i<outlength;i++){
+		tmp = 0;
 		if(MA_out_ABS[i] > threshold){
 			// MA_out_ABS[i] = 1;
 			if(MA_out[i] > 0){
-				Debug_out[i] = 1;
-				bin_out[i] = 1;
+				tmp = 1;
 			}else{
-				Debug_out[i] = -1;
-				bin_out[i] = -1;
+				tmp = -1;
 			}
 		}else{
 			// MA_out_ABS[i] = 0;
-			Debug_out[i] = 0;
-			bin_out[i] = 0;
+			tmp = 0;
 		}
-		if(bin_out[i] != status){
-			if(bin_out[i] > status){
-				edge_pushT(&edgeL2H, i, bin_out[i]);
+		if(tmp != status){
+			if(tmp > status){
+				edge_pushT(&edgeL2H, i, tmp);
 			}else{
-				edge_pushT(&edgeH2L, i, bin_out[i]);
+				//edge_pushT(&edgeH2L, i, bin_out[i]);
 			}
-		}else{
-			
 		}
-		status = bin_out[i];
+		bin_out[i] = tmp;
+		status = tmp;
+//		Debug_out[i] = status;
 	}
 }
 

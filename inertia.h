@@ -1,6 +1,80 @@
 // accel.h
 // API definition for the MPU6050 accelerometer/gyro on the I2C bus
 #include <stdint.h>
+
+/** Initialize the I2C peripheral. It sets the default parameters for I2C
+ *  peripheral, and configures its specifieds pins.
+ *  
+ *  @param obj  The I2C object
+ *  @param sda  The sda pin
+ *  @param scl  The scl pin
+ */
+void i2c_init(void);
+
+/** Configure the I2C frequency
+ *
+ *  @param obj The I2C object
+ *  @param hz  Frequency in Hz
+ */
+void i2c_frequency(int hz);
+
+/** Send START command
+ *
+ *  @param obj The I2C object
+ */
+int  i2c_start(void);
+
+/** Send STOP command
+ *
+ *  @param obj The I2C object
+ */
+int  i2c_stop(void);
+
+/** Blocking reading data
+ *
+ *  @param obj     The I2C object
+ *  @param address 7-bit address (last bit is 1)
+ *  @param data    The buffer for receiving
+ *  @param length  Number of bytes to read
+ *  @param stop    Stop to be generated after the transfer is done
+ *  @return Number of read bytes
+ */
+int i2c_read(int address, char *data, int length, int stop);
+
+/** Blocking sending data
+ *
+ *  @param obj     The I2C object
+ *  @param address 7-bit address (last bit is 0)
+ *  @param data    The buffer for sending
+ *  @param length  Number of bytes to write
+ *  @param stop    Stop to be generated after the transfer is done
+ *  @return Number of written bytes
+ */
+int i2c_write(int address, const char *data, int length, int stop);
+
+/** Reset I2C peripheral. TODO: The action here. Most of the implementation sends stop()
+ *
+ *  @param obj The I2C object
+ */
+void i2c_reset(void);
+
+/** Read one byte
+ *
+ *  @param obj The I2C object
+ *  @param last Acknoledge
+ *  @return The read byte
+ */
+int i2c_byte_read(int last);
+
+/** Write one byte
+ *
+ *  @param obj The I2C object
+ *  @param data Byte to be written
+ *  @return 0 if NAK was received, 1 if ACK was received, 2 for timeout.
+ */
+int i2c_byte_write(int data);
+
+
 typedef struct {
 	int16_t x_a,y_a,z_a;
 	int16_t x_g,y_g,z_g;

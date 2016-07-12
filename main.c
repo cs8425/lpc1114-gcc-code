@@ -81,18 +81,20 @@ int main(void){
 		TimerEv_tick(&timerev); // 週期性的事件推送
 		switch(EventDriven_get(&eventloop)){ // 事件處理
 			case CAM:
-				SET_LED1_HIGH;
+
 				capture();
+				SET_LED1_HIGH;
 				filt();
 				MA();
 				scale();
-				cut();
 				SET_LED1_LOW;
-
 				SET_LED2_HIGH;
+				cut();
+				SET_LED2_LOW;
+
 				M_FB = get_dip() * 400;
 				toCtrl();
-				SET_LED2_LOW;
+
 			break;
 
 			case DEBUG:
