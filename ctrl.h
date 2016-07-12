@@ -28,7 +28,7 @@ uint8_t show_mode = 0;
 uint8_t force_stop = 0;
 
 float debug_f = 0.0;
-int16_t debug_int = 0;
+int16_t debug_int1 = 0;
 int16_t debug_int2 = 0;
 int16_t debug_int3 = 0;
 
@@ -52,12 +52,15 @@ uint16_t isStart = 0;
 #define RUN_L_out   2
 #define RUN_all_out 3
 uint8_t flag = 0;
+
 void toCtrl(void) {
 
 	int16_t out;
 	int16_t dfout;
 
 	int16_t diff = 0;
+	int16_t ddiff = 0;
+	static int16_t dfout_1 = 0;
 
 	// 預處理, 避免奇怪資料進入PID
 
@@ -120,15 +123,20 @@ void toCtrl(void) {
 	}
 
 
+	ddiff = diff - dfout_1;
+	dfout_1 = diff;
 
-	debug_int = L;
-	debug_int2 = R;
+	debug_int1 = diff;
+	debug_int2 = ddiff;
 
-	debug_int3 = diff;
 
 	// 計算前輪轉向的控制量
 	// debug_f = servo.ctrl2(L, R, pL.D, pR.D);
-	out = PIDf32_PDctrl(&servo, diff);
+//	out = PIDf32_PDctrl(&servo, diff);
+	degOfFire(&Af, (diff * 5), (ddiff * 0));
+	out = deFuzzication(&Af);
+
+	debug_int3 = out;
 
 	out = 3000 - out;
 	if(out > 3700) out = 3700;

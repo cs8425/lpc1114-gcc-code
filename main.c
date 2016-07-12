@@ -7,6 +7,8 @@
 
 #include "hal.h"
 
+#include "fuzzysetupIntC.h"
+
 #include "EventDriven.h"
 #include "TimerEv.h"
 
@@ -77,6 +79,8 @@ int main(void){
 	edge_init(&edgeL2H);
 	edge_init(&edgeH2L);
 
+	FuzzySetup();
+
 	while (1) {
 		TimerEv_tick(&timerev); // 週期性的事件推送
 		switch(EventDriven_get(&eventloop)){ // 事件處理
@@ -93,12 +97,14 @@ int main(void){
 				SET_LED2_LOW;
 
 				M_FB = get_dip() * 400;
+				SET_LED3_HIGH;
 				toCtrl();
+				SET_LED3_LOW;
 
 			break;
 
 			case DEBUG:
-				dump2();
+				//dump2();
 			break;
 
 			case LED:
@@ -109,6 +115,10 @@ int main(void){
 				eputc('0' + GET_SW0);
 				eputc(',');
 				eputc('0' + GET_SW1);
+				eputc(',');
+				printShort(debug_int1);
+				eputc(',');
+				printShort(debug_int2);
 				eputc(',');
 				printShort(debug_int3);
 				printString("\n");
