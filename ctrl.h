@@ -133,7 +133,7 @@ void toCtrl(void) {
 	// 計算前輪轉向的控制量
 	// debug_f = servo.ctrl2(L, R, pL.D, pR.D);
 //	out = PIDf32_PDctrl(&servo, diff);
-	degOfFire(&Af, (diff * 1), (ddiff / 64));
+	degOfFire(&Af, (diff * 3), (ddiff / 64));
 	out = deFuzzication(&Af) / 32;
 
 	debug_int3 = out;

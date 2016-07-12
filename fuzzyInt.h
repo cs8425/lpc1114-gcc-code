@@ -220,13 +220,13 @@ int8_t degOfFire(Fuzzy *fy, Finput_t sysin1, Finput_t sysin2) {
 		} else if( sysin2 < fy->_input2->_inMf[index].middleL ) {
 			d1 = sysin2 - fy->_input2->_inMf[index].left;
 //			v2 = d1 / fy->_input2->_inMf[index].slopeL;
-			v2 = (d1 == 0) ? 0 : fy->_input2->_inMf[index].slopeL / d1;
+			v2 = (d1 == 0) ? 0 : fy->_input2->_inMf[index].slopeL * d1;
 		} else if( sysin2 <= fy->_input2->_inMf[index].middleR ) {
 			v2 = 1;
 		} else if( sysin2 < fy->_input2->_inMf[index].right ) {
 			d1 = sysin2 - fy->_input2->_inMf[index].right;
 //			v2 = d1 / fy->_input2->_inMf[index].slopeR;
-			v2 = (d1 == 0) ? 0 : fy->_input2->_inMf[index].slopeR / d1;
+			v2 = (d1 == 0) ? 0 : fy->_input2->_inMf[index].slopeR * d1;
 		} else {
 			v2 = 0;
 		}
