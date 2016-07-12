@@ -7,28 +7,28 @@
 #define _debug 1
 
 #define Frule_t   int32_t
-#define Finput_t  int32_t
-#define Foutput_t int32_t
+#define Finput_t  int16_t
+#define Foutput_t int64_t
 #define Fmbf_t    int32_t
 #define Ftype_t   int32_t
 
 /*
-#define Frule_t  float
-#define Finput_t float
-#define Fmbf_t   float
-#define Foutput_t int32_t
-#define Ftype_t  float
+#define Frule_t   float
+#define Finput_t  float
+#define Fmbf_t    float
+#define Foutput_t float
+#define Ftype_t   float
 */
 #define MAXINMBNUM 0x07 
 #define MAXRULE  0x31
 
-#define MAXVALUE     65535
+#define MAXVALUE     32767
 
 #define min(a, b) (((b) > (a)) ? (a) : (b))
 
 typedef struct {
 	uint8_t ID;
-	uint8_t Type;
+//	uint8_t Type;
 	Fmbf_t left;
 	Fmbf_t middleL;
 	Fmbf_t middleR;
@@ -55,7 +55,7 @@ int8_t setTrimf(FuzzyInput* fi, uint8_t mfID, Finput_t left, Finput_t middleLeft
 	Finput_t tmp = 0;
 	if(mfID < fi->_maxInMfNum) {
 		fi->_inMf[mfID].ID = mfID;
-		fi->_inMf[mfID].Type = 0;
+//		fi->_inMf[mfID].Type = 0;
 		fi->_inMf[mfID].left = left;
 		fi->_inMf[mfID].middleL = middleLeft;
 		fi->_inMf[mfID].middleR = middleRight;
@@ -112,8 +112,8 @@ typedef struct {
 //	uint8_t _fuzzifiType;
 //	uint8_t _andType;
 //	uint8_t _impType;
-	Ftype_t _inMaxR[2];
-	Ftype_t _inMaxL[2];
+	Finput_t _inMaxR[2];
+	Finput_t _inMaxL[2];
 
 } Fuzzy;
 
@@ -185,7 +185,7 @@ int8_t setImpType(Fuzzy *fy,uint8_t impType) {
 }
 */
 int8_t degOfFire(Fuzzy *fy, Finput_t sysin1, Finput_t sysin2) {
-	Finput_t d1=0.0,v1=0.0,v2=0.0;
+	Ftype_t d1=0.0,v1=0.0,v2=0.0;
 	uint8_t index=0,i=0,j=0;
 	int8_t result=0;
 	
@@ -203,13 +203,15 @@ int8_t degOfFire(Fuzzy *fy, Finput_t sysin1, Finput_t sysin2) {
 		} else if( sysin1 < fy->_input1->_inMf[index].middleL ) {
 			d1 = sysin1 - fy->_input1->_inMf[index].left;
 //			v1 = d1 / fy->_input1->_inMf[index].slopeL;
-			v1 = (d1 == 0) ? 0 : fy->_input1->_inMf[index].slopeL * d1;
+//			v1 = (d1 == 0) ? 0 : fy->_input1->_inMf[index].slopeL * d1;
+			v1 = fy->_input1->_inMf[index].slopeL * d1;
 		} else if( sysin1 <= fy->_input1->_inMf[index].middleR ) {
-			v1 = 1;
+			v1 = MAXVALUE;
 		} else if( sysin1 < fy->_input1->_inMf[index].right ) {
 			d1 = sysin1 - fy->_input1->_inMf[index].right;
 //			v1 = d1 / fy->_input1->_inMf[index].slopeR;
-			v1 = (d1 == 0) ? 0 : fy->_input1->_inMf[index].slopeR * d1;
+//			v1 = (d1 == 0) ? 0 : fy->_input1->_inMf[index].slopeR * d1;
+			v1 = fy->_input1->_inMf[index].slopeR * d1;
 		} else {
 			v1 = 0;
 		}
@@ -220,13 +222,15 @@ int8_t degOfFire(Fuzzy *fy, Finput_t sysin1, Finput_t sysin2) {
 		} else if( sysin2 < fy->_input2->_inMf[index].middleL ) {
 			d1 = sysin2 - fy->_input2->_inMf[index].left;
 //			v2 = d1 / fy->_input2->_inMf[index].slopeL;
-			v2 = (d1 == 0) ? 0 : fy->_input2->_inMf[index].slopeL * d1;
+//			v2 = (d1 == 0) ? 0 : fy->_input2->_inMf[index].slopeL * d1;
+			v2 = fy->_input2->_inMf[index].slopeL * d1;
 		} else if( sysin2 <= fy->_input2->_inMf[index].middleR ) {
-			v2 = 1;
+			v2 = MAXVALUE;
 		} else if( sysin2 < fy->_input2->_inMf[index].right ) {
 			d1 = sysin2 - fy->_input2->_inMf[index].right;
 //			v2 = d1 / fy->_input2->_inMf[index].slopeR;
-			v2 = (d1 == 0) ? 0 : fy->_input2->_inMf[index].slopeR * d1;
+//			v2 = (d1 == 0) ? 0 : fy->_input2->_inMf[index].slopeR * d1;
+			v2 = fy->_input2->_inMf[index].slopeR * d1;
 		} else {
 			v2 = 0;
 		}
@@ -312,7 +316,7 @@ Foutput_t deFuzzication(Fuzzy *fy) {
 */
 					num = num + a1;
 					den = den + valuei;
-					//printf("%d %d %d %f %f %f %f\n",ri1,ri2,ro1,valuei,valueo,num,den);
+//					printf("%d %d %f %f %f %f\n",ri1,ri2,valuei,valueo,num,den);
 //					printf("%d %d %d %d %d %d\n",ri1,ri2,valuei,valueo,num,den);
 				}
 			}

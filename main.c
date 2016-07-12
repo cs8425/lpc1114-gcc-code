@@ -81,6 +81,9 @@ int main(void){
 
 	FuzzySetup();
 
+//	TFC_SetServo(2890);
+//	while(1);
+
 	while (1) {
 		TimerEv_tick(&timerev); // 週期性的事件推送
 		switch(EventDriven_get(&eventloop)){ // 事件處理

@@ -19,7 +19,7 @@ PIDf32_new(servo, 10.0, 0.0, 4.5);
 // 後輪差速的PID
 //PIDf32_new(differential, 3.0f, 0.4f, 4.0f);
 //PIDf32_new(differential, 1.5f, 0.2f, 2.6f);
-PIDf32_new(differential, 1.6f, 2.6f, 2.6f);
+PIDf32_new(differential, 5.2f, 4.6f, 5.6f);
 
 
 uint8_t run_mode = 0;
@@ -133,7 +133,7 @@ void toCtrl(void) {
 	// 計算前輪轉向的控制量
 	// debug_f = servo.ctrl2(L, R, pL.D, pR.D);
 //	out = PIDf32_PDctrl(&servo, diff);
-	degOfFire(&Af, (diff * 3), (ddiff / 64));
+	degOfFire(&Af, (diff * 15), (ddiff / 8));
 	out = deFuzzication(&Af) / 32;
 
 	debug_int3 = out;
@@ -141,7 +141,7 @@ void toCtrl(void) {
 	out = 3000 - out;
 	if(out > 3700) out = 3700;
 	if(out < 2300) out = 2300;
-	M_SV = out;
+	M_SV = out - 110;
 
 
 	// 計算後輪差速的控制量
