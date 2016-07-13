@@ -21,6 +21,8 @@ extern unsigned char  INIT_DATA_START;
 extern unsigned char  INIT_DATA_END;
 extern unsigned char  BSS_START;
 extern unsigned char  BSS_END;
+extern void _vStackTop(void);
+
 extern void SPI1_ISR(void);
 extern void I2C_isr(void);
 extern void UART_isr(void);
@@ -28,7 +30,8 @@ extern void SysTick(void);
 // the section "vectors" is placed at the beginning of flash 
 // by the linker script
 const void * Vectors[] __attribute__((section(".vectors"))) ={
-	(void *)0x10001000, 	/* Top of stack */ 
+/*	(void *)0x10001000, 	/* Top of stack */
+	&_vStackTop, 	/* Top of stack */
 	init,   		/* Reset Handler */
 	Default_Handler,	/* NMI */
 	Default_Handler,	/* Hard Fault */
