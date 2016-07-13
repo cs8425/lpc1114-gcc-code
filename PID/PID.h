@@ -23,6 +23,7 @@ float PIDf32_PDctrl2(PIDf32 *_pid, int16_t pos, int16_t dpos);
 float PIDf32_ctrlT(PIDf32 *_pid, int16_t pos, uint32_t dt);
 float PIDf32_PDctrl(PIDf32 *_pid, int16_t pos);
 float PIDf32_PDctrlDF(PIDf32 *_pid, int16_t pos);
+float PIDf32_PDctrlSD(PIDf32 *_pid, int16_t pos);
 
 
 typedef struct {

@@ -85,6 +85,11 @@ int main(void){
 //	while(1);
 
 	while (1) {
+		if(GET_SW1 == 0){
+			TimerEv_add(&timerev, Real_start, 3000*1000, 0, 1);
+			SET_LED3_HIGH;
+		}
+
 		TimerEv_tick(&timerev); // 週期性的事件推送
 		switch(EventDriven_get(&eventloop)){ // 事件處理
 			case CAM:
@@ -94,16 +99,18 @@ int main(void){
 				filt();
 				MA();
 				scale();
-				SET_LED1_LOW;
-				SET_LED2_HIGH;
 				cut();
-				SET_LED2_LOW;
+				SET_LED1_LOW;
 
-				M_FB = get_dip() * 400;
-				SET_LED3_HIGH;
+				M_FB = get_dip() * 500;
+				SET_LED2_HIGH;
 				toCtrl();
-				SET_LED3_LOW;
+				SET_LED2_LOW;
+			break;
 
+			case Real_start:
+				SET_LED3_LOW;
+				isStart = 1;
 			break;
 
 			case DEBUG:

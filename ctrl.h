@@ -2,10 +2,11 @@
 #define _CTRL_H
 
 #include "PID/PID.h"
-// #include "fuzzy.h"
 #include "filter.h"
 #include "tools.h"
 #include "hal.h"
+
+#include "ringbuffer.h"
 
 
 #define centerA 0
@@ -23,13 +24,12 @@ PIDf32_new(differential, 5.2f, 4.6f, 5.6f);
 
 
 // 轉彎減速
-PIDf32_new(slowdown, 8.0f, 0.0f, 8.0f);
+PIDf32_new(slowdown, 12.0f, 0.0f, 16.0f);
 
+// 低通
+Ringbuff_new(prefilt);
 
 uint8_t run_mode = 0;
-uint8_t show_mode = 0;
-
-uint8_t force_stop = 0;
 
 float debug_f = 0.0;
 int16_t debug_int1 = 0;
@@ -63,9 +63,12 @@ void toCtrl(void) {
 	int16_t dfout;
 	int16_t sout;
 
+
 	int16_t diff = 0;
 	int16_t ddiff = 0;
 	static int16_t dfout_1 = 0;
+
+	int16_t diffpre = 0;
 
 	// 預處理, 避免奇怪資料進入PID
 
@@ -127,6 +130,8 @@ void toCtrl(void) {
 			break;
 	}
 
+	Ringbuff_push(&prefilt, diff);
+	diffpre = Ringbuff_filt(&prefilt);
 
 	ddiff = diff - dfout_1;
 	dfout_1 = diff;
@@ -137,11 +142,12 @@ void toCtrl(void) {
 
 	// 計算前輪轉向的控制量
 	// debug_f = servo.ctrl2(L, R, pL.D, pR.D);
-	out = PIDf32_PDctrl(&servo, diff);
+	out = PIDf32_PDctrl(&servo, diffpre);
 //	degOfFire(&Af, (diff * 15), (ddiff / 8));
 //	out = deFuzzication(&Af) / 32;
 
-	out = 3000 - out + 110;
+//	out = 3000 - out + 110;
+	out = 3000 - out;
 	if(out > 3700) out = 3700;
 	if(out < 2300) out = 2300;
 	M_SV = out;
@@ -161,11 +167,13 @@ void toCtrl(void) {
 	debug_int3 = -dfout;
 
 	// 計算後輪減速的控制量
-	sout = PIDf32_PDctrl(&slowdown, ABS16(diff));
+	sout = PIDf32_PDctrlSD(&slowdown, diffpre);
 
-	if(sout >  512) sout = 512;
+	if(sout >  768) sout = 768;
 	if(sout < -1024) sout = -1024;
 	M_FB = M_FB - ((sout * M_FB) >> 10);
+
+	if(isStart == 0) M_FB = 0;
 
 	toPWM(M_FB, M_DF, M_SV);
 }
