@@ -22,6 +22,10 @@ PIDf32_new(servo, 8.0, 0.0, 8.5);
 PIDf32_new(differential, 5.2f, 4.6f, 5.6f);
 
 
+// 轉彎減速
+PIDf32_new(slowdown, 8.0f, 0.0f, 8.0f);
+
+
 uint8_t run_mode = 0;
 uint8_t show_mode = 0;
 
@@ -57,6 +61,7 @@ void toCtrl(void) {
 
 	int16_t out;
 	int16_t dfout;
+	int16_t sout;
 
 	int16_t diff = 0;
 	int16_t ddiff = 0;
@@ -144,16 +149,23 @@ void toCtrl(void) {
 
 	// 計算後輪差速的控制量
 //	dfout = PIDf32_PDctrlDF(&differential, diff);
-	degOfFire(&Af, (diff * 1), (ddiff *2));
-	dfout = deFuzzication(&Af) / 5.5;//if out small then 
+	degOfFire(&Af, (diff * 1), (ddiff * 1));
+	dfout = deFuzzication(&Af) / 6;//if out small then 
 	// dfout = differential.ctrl2(L, R, pL.D, pR.D);
 //	dfout = - dfout;
 
-	if(dfout > 4800) dfout = 4800;
+	if(dfout >  4800) dfout = 4800;
 	if(dfout < -4800) dfout = -4800;
 	M_DF = -dfout;
 
 	debug_int3 = -dfout;
+
+	// 計算後輪減速的控制量
+	sout = PIDf32_PDctrl(&slowdown, ABS16(diff));
+
+	if(sout >  512) sout = 512;
+	if(sout < -1024) sout = -1024;
+	M_FB = M_FB - ((sout * M_FB) >> 10);
 
 	toPWM(M_FB, M_DF, M_SV);
 }
