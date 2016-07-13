@@ -24,7 +24,7 @@ PIDf32_new(differential, 5.2f, 4.6f, 5.6f);
 
 
 // 轉彎減速
-PIDf32_new(slowdown, 12.0f, 0.0f, 16.0f);
+PIDf32_new(slowdown, 12.0f, 0.0f, 18.0f);
 
 // 低通
 Ringbuff_new(prefilt);
@@ -172,8 +172,6 @@ void toCtrl(void) {
 	if(sout < -1024) sout = -1024;
 	M_FB = M_FB - ((sout * M_FB) >> 10);
 
-	if(isStart == 0) M_FB = 0;
-
 	toPWM(M_FB, M_DF, M_SV);
 }
 
@@ -204,22 +202,6 @@ void toPWM(int16_t _FB, int16_t _DF, int16_t _SV) {
 //            break;
 
 
-        // 比賽實用的速度清單
-        case OK_Mode:
-            TFC_SetServo(_SV);
-            //motor(pot1.read_u16() >> 6, _DF);
-            break;
-
-        case TEST2_Mode:
-            TFC_SetServo(_SV);
-            motor(205, _DF);
-            break;
-
-        case TEST3_Mode:
-            TFC_SetServo(_SV);
-            motor(240, _DF);
-            break;
-
         default:
             ;
     }
@@ -237,6 +219,7 @@ void motor(int16_t B, int16_t A){
 	int16_t chA = centerA;
 	int16_t chB = centerB;
 
+	if(isStart == 0) return;
 
 	chA = centerA - (thA) + (thB);
 	chB = centerB + (thA) + (thB);
