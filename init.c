@@ -30,7 +30,6 @@ extern void SysTick(void);
 // the section "vectors" is placed at the beginning of flash 
 // by the linker script
 const void * Vectors[] __attribute__((section(".vectors"))) ={
-/*	(void *)0x10001000, 	// Top of stack */
 	&_vStackTop, 	/* Top of stack */
 	init,   		/* Reset Handler */
 	Default_Handler,	/* NMI */

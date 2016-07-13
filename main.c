@@ -64,8 +64,6 @@ int main(void){
 	GPIO_init();
 	PWM_init();
 
-	//initSysTick();
-
 	us_ticker_init();
 
 	EventDriven_init(&eventloop);
@@ -138,9 +136,6 @@ int main(void){
 
 		}
 
-
-
-//		delay(6000000);
 	}
 /*	delay(100000);
 	int RValue;

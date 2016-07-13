@@ -139,7 +139,6 @@ void toCtrl(void) {
 	debug_int1 = diff;
 	debug_int2 = ddiff;
 
-
 	// 計算前輪轉向的控制量
 	// debug_f = servo.ctrl2(L, R, pL.D, pR.D);
 	out = PIDf32_PDctrl(&servo, diffpre);
