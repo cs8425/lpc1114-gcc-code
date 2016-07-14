@@ -12,9 +12,13 @@
 #define centerA 0
 #define centerB 0
 
+// FB = 1500
+// S_PID = 5.0,0.0,8.5
+// slow_PID = 12.0, 0.0, 18.0
+// slowlimit = 768
 
 // 前輪轉向的PID參數
-PIDf32_new(servo, 8.0, 0.0, 8.5);
+PIDf32_new(servo, 8.0, 0.0, 7.5);
 //PIDf32_new(servo, 8.0, 0.0, 4.5);
 
 // 後輪差速的PID
@@ -24,7 +28,7 @@ PIDf32_new(differential, 5.2f, 4.6f, 5.6f);
 
 
 // 轉彎減速
-PIDf32_new(slowdown, 12.0f, 0.0f, 18.0f);
+PIDf32_new(slowdown, 12.0f, 0.0f, 20.0f);
 
 // 低通
 Ringbuff_new(prefilt);
@@ -154,7 +158,7 @@ void toCtrl(void) {
 
 	// 計算後輪差速的控制量
 //	dfout = PIDf32_PDctrlDF(&differential, diff);
-	degOfFire(&Af, (diff * 1), (ddiff * 1));
+	degOfFire(&Af, (diff * 1), (ddiff * 1.5));
 	dfout = deFuzzication(&Af) / 6;//if out small then 
 	// dfout = differential.ctrl2(L, R, pL.D, pR.D);
 //	dfout = - dfout;
@@ -168,7 +172,7 @@ void toCtrl(void) {
 	// 計算後輪減速的控制量
 	sout = PIDf32_PDctrlSD(&slowdown, diffpre);
 
-	if(sout >  768) sout = 768;
+	if(sout >  684) sout = 684;
 	if(sout < -1024) sout = -1024;
 	M_FB = M_FB - ((sout * M_FB) >> 10);
 

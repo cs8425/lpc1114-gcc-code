@@ -66,14 +66,14 @@ float PIDf32_PDctrlSD(PIDf32 *_pid, int16_t pos) {
 
 	pos = (pos < 0) ? -pos : pos;
 
-        int32_t error = pos - _pid->target;
+	int32_t error = pos - _pid->target;
 
-        int32_t dError = error - _pid->lastError;
-        _pid->lastError = error;
+	int32_t dError = error - _pid->lastError;
+	_pid->lastError = error;
 
-        //float out = (_pid->k_p * error) + (_pid->k_i * _pid->sumError) + (_pid->k_d * dError);
-        float out = (_pid->k_p * error) + (_pid->k_d * dError);
+	//float out = (_pid->k_p * error) + (_pid->k_i * _pid->sumError) + (_pid->k_d * dError);
+	float out = (_pid->k_p * error) + (_pid->k_d * dError);
 
-        return out;
+	return out;
 }
 
