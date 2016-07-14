@@ -28,7 +28,7 @@ PIDf32_new(differential, 5.2f, 4.6f, 5.6f);
 
 
 // 轉彎減速
-PIDf32_new(slowdown, 12.0f, 0.0f, 20.0f);
+PIDf32_new(slowdown, 16.0f, 0.0f, 18.0f);
 
 // 低通
 Ringbuff_new(prefilt);
@@ -43,6 +43,8 @@ int16_t debug_int3 = 0;
 int16_t M_FB = 0;
 int16_t M_DF = 0;
 int16_t M_SV = 3000;
+
+int32_t emuspeed = 0;
 
 void motor(int16_t B, int16_t A);
 void toPWM(int16_t _FB, int16_t _DF, int16_t _SV);
@@ -167,14 +169,14 @@ void toCtrl(void) {
 	if(dfout < -4800) dfout = -4800;
 	M_DF = -dfout;
 
-	debug_int3 = -dfout;
+	debug_int3 = emuspeed;
 
 	// 計算後輪減速的控制量
 	sout = PIDf32_PDctrlSD(&slowdown, diffpre);
 
 	if(sout >  684) sout = 684;
 	if(sout < -1024) sout = -1024;
-	M_FB = M_FB - ((sout * M_FB) >> 10);
+	M_FB = M_FB - ((sout * emuspeed) >> 10);
 
 	toPWM(M_FB, M_DF, M_SV);
 }
@@ -223,6 +225,9 @@ void motor(int16_t B, int16_t A){
 	int16_t chA = centerA;
 	int16_t chB = centerB;
 
+	int32_t tmpA;
+	int32_t tmpB;
+
 	if(isStart == 0) return;
 
 	chA = centerA - (thA) + (thB);
@@ -244,6 +249,11 @@ void motor(int16_t B, int16_t A){
 		chB = -4800;
 		chA += chB + 4800;
 	}
+
+	tmpA = -chA;
+	tmpB = -chB;
+
+	emuspeed = ( (emuspeed * 15) + ((int32_t)((tmpA + tmpB) / 2) * 1) ) >> 4;
 
 	TFC_SetMotorPWM( chA, chB);
 	//TFC_HBRIDGE_ENABLE;
