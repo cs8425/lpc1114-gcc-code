@@ -100,7 +100,7 @@ int main(void){
 				cut();
 				SET_LED1_LOW;
 
-				M_FB = get_dip() * 500;
+				M_FB = 500+ get_dip() * 300;
 				SET_LED2_HIGH;
 				toCtrl();
 				SET_LED2_LOW;

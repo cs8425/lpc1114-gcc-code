@@ -152,7 +152,7 @@ void toCtrl(void) {
 //	out = deFuzzication(&Af) / 32;
 
 //	out = 3000 - out + 110;
-	out = 3000 - out;
+	out = 3000 + out;
 	if(out > 3700) out = 3700;
 	if(out < 2300) out = 2300;
 	M_SV = out;
@@ -185,8 +185,8 @@ void toCtrl(void) {
 // 輸入算完的"速度"、"差速"、"轉向"控制量
 void toPWM(int16_t _FB, int16_t _DF, int16_t _SV) {
 
-	TFC_SetServo(_SV);
-	motor( -_FB, -_DF);
+	TFC_SetServo( _SV);
+	motor( _FB, -_DF);
 /*
     switch( run_mode ) {
         case Init_Mode:
@@ -250,8 +250,8 @@ void motor(int16_t B, int16_t A){
 		chA += chB + 4800;
 	}
 
-	tmpA = -chA;
-	tmpB = -chB;
+	tmpA = chA;
+	tmpB = chB;
 
 	emuspeed = ( (emuspeed * 15) + ((int32_t)((tmpA + tmpB) / 2) * 1) ) >> 4;
 
