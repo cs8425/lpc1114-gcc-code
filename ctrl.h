@@ -18,7 +18,7 @@
 // slowlimit = 768
 
 // 前輪轉向的PID參數
-PIDf32_new(servo, 8.0, 0.0, 7.5);
+PIDf32_new(servo, 8.0, 0.0, 8.5);
 //PIDf32_new(servo, 8.0, 0.0, 4.5);
 
 // 後輪差速的PID
@@ -28,7 +28,7 @@ PIDf32_new(differential, 5.2f, 4.6f, 5.6f);
 
 
 // 轉彎減速
-PIDf32_new(slowdown, 16.0f, 0.0f, 18.0f);
+PIDf32_new(slowdown, 18.0f, 0.0f, 18.0f);
 
 // 低通
 Ringbuff_new(prefilt);
@@ -181,39 +181,13 @@ void toCtrl(void) {
 	toPWM(M_FB, M_DF, M_SV);
 }
 
-//TODO: 清理&最佳化
 // 輸入算完的"速度"、"差速"、"轉向"控制量
 void toPWM(int16_t _FB, int16_t _DF, int16_t _SV) {
 
 	TFC_SetServo(_SV);
 	motor( -_FB, -_DF);
-/*
-    switch( run_mode ) {
-        case Init_Mode:
-//            TFC_SetMotorPWM(centerA, centerB);
-//            TFC_HBRIDGE_DISABLE;
-//            TFC_SetServo(_SV, _SV);
-            break;
-//        case RC_speed_Mode:
-//            // TFC_HBRIDGE_ENABLE;
-//            TFC_SetServo(0, SV);
-//            if(force_stop == 0) motor(ch1, DF);
-//            break;
-//        case RC_Mode:
-//            // TFC_HBRIDGE_ENABLE;
-//            // TFC_SetServo2(0, ch3);
-//            TFC_SetServo(0, ch3);
-//            // TFC_SetServo(0, SV);
-//            if(force_stop == 0) motor(ch1, ch2);
-//            break;
 
-
-        default:
-            ;
-    }
-*/
 }
-
 
 
 // 把2個數值換算為真正的PWM
