@@ -57,6 +57,17 @@ void delay(uint32_t amount)
 EventDriven eventloop;
 TimerEv timerev;
 
+int16_t speedlist[8] = {
+	1300,
+	1400,
+	1500,
+	1600,
+	1650,
+	1700,
+	1750,
+	1800,
+};
+
 int main(void){
 	initUART();
 
@@ -100,7 +111,7 @@ int main(void){
 				cut();
 				SET_LED1_LOW;
 
-				M_FB = 1000 + get_dip() * 200; //1400 ok, 1700 ok, 1600 ok, 1800 out
+				M_FB = speedlist[get_dip()]; //1400 ok, 1700 ok, 1600 ok, 1800 out
 				SET_LED2_HIGH;
 				toCtrl();
 				SET_LED2_LOW;
